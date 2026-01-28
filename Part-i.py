@@ -7,6 +7,8 @@ import radiallog as radlog
 
 r = np.linspace(0,20,1000) 
 Z = 1
+
+
 P = Rf.P1s(r,Z)
 P3s=Rf.P3s(r,Z)
 P3p=Rf.P3p(r,Z)
