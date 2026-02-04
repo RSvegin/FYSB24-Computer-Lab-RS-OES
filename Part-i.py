@@ -48,29 +48,42 @@ r,P,E=rad.radial(l,n,Z)
 plt.savefig("radial_function.png")
 
 #testing radiallog function
-r,P,E=radlog.radiallog(l,n,Z)
+r,P,E,grid_points=radlog.radiallog(l,n,Z)
 plt.savefig("radiallog_function.png")
 
 #task 3
+import pandas as pd
 l=0
 n=[1,2,3,6,9]
+ana_energies=[]
 rad_energies=[]
 radlog_energies=[]
+rad_gridpoints=[]
+radlog_gridpoints=[]
 for i in n:
     r,P,E=rad.radial(l,i,Z)
     rad_energies.append(E)
-    r,p,E=radlog.radiallog(l,i,Z)
+    r,p,E,grid_points=radlog.radiallog(l,i,Z) #adding all the data for the table
     radlog_energies.append(E)
+    rad_gridpoints.append(10000)
+    radlog_gridpoints.append(grid_points)
+    ana_energies.append(-Z**2/(2*i**2))
+    
 
-gridpoints=np.linspace(1,10000,1)
+data={"Analytical Energies":ana_energies,
+      "Radial Energies":rad_energies,
+      "RadialLog Energies":radlog_energies,
+      "Radial Grid Points":rad_gridpoints, #making table
+      "RadialLog Grid Points":radlog_gridpoints}
+df=pd.DataFrame(data) #creating dataframe
+print(df)
 
-plt.plot(n,rad_energies,'o-')
-plt.plot(n,radlog_energies,'o-')
-plt.legend(["radial","radiallog"])
-plt.savefig("energies_comparison.png")
+
+
+
+ 
 
 
 #task 4
-dr[1]-dr[0]
-r_expectation_value=sum(r*P**2) * dr
+
 

@@ -149,7 +149,7 @@ def radiallog(l,n,Z,plot=True):
         plt.tight_layout(pad=1.0)
         plt.show()
 
-    return (r,P,E,)
+    return (r,P,E,grid_points)
  
 if __name__ == '__main__':  
     #input
