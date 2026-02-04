@@ -62,14 +62,29 @@ rad_energies=[]
 radlog_energies=[]
 rad_gridpoints=[]
 radlog_gridpoints=[]
+rs = []
+Ps = []
+labels = []
+
 for i in n:
-    r,P,E=rad.radial(l,i,Z)
+    # --- radial.py ---
+    r_lin, P_lin, E = rad.radial(l, i, Z)
     rad_energies.append(E)
-    r,p,E,grid_points=radlog.radiallog(l,i,Z) #adding all the data for the table
-    radlog_energies.append(E)
     rad_gridpoints.append(10000)
+
+    # --- radiallog.py ---
+    r_log, P_log_trans, E_log, grid_points = radlog.radiallog(l, i, Z)
+    radlog_energies.append(E_log)
     radlog_gridpoints.append(grid_points)
+
+    # analytical
     ana_energies.append(-Z**2/(2*i**2))
+
+    # ---- store LOG-GRID solution for plotting ----
+    P_true = np.sqrt(r_log) * P_log_trans   # convert transformed P(ρ) to real P(r)
+    rs.append(r_log)
+    Ps.append(P_true)
+    labels.append(f"{i}s")
 
 
 data={"Analytical Energies":ana_energies,
@@ -80,26 +95,41 @@ data={"Analytical Energies":ana_energies,
 df=pd.DataFrame(data) #creating dataframe
 print(df)
 
+
+plt.figure(figsize=(8,6))
+
+for r, P, label in zip(rs, Ps, labels):
+    plt.plot(r, P, label=label)
+
+plt.xlabel("r (a.u.)")
+plt.ylabel("P(r)")
+plt.title("Radial Wave Functions for 1s, 2s, 3s, 6s, 9s")
+plt.legend(title="Orbitals")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+plt.savefig("radial_wavefunctions_1s_2s_3s_6s_9s.png")
+
 #task 4
 #dr = r[1]-r[0]
 #r_expectation_value = sum(r*P**2)*dr
 
-n = [1,2,3,4]
-for i in n:
-    r,P,E=rad.radial(l,i,Z)
-    dr = r[1]-r[0]
-    r_expectation_value = sum(r*P**2)*dr
-    print(f"Radial expectation value for n={i} is {r_expectation_value}")
+#n = [1,2,3,4]
+#for i in n:
+    #r,P,E=rad.radial(l,i,Z)
+    #dr = r[1]-r[0]
+   # r_expectation_value = sum(r*P**2)*dr
+ #   print(f"Radial expectation value for n={i} is {r_expectation_value}")
     
-    plt.subplots(2,2)
-    plt.subplot(2,2,n.index(i)+1)
-    plt.plot(r,P**2)
-    plt.vlines(r_expectation_value, ymin=0, ymax=max(P**2), colors='r', linestyles='dashed', label='<r>')
-    plt.title(f"Radial Probability Density for n={i}, l={l}\n<r>={r_expectation_value:.2f}")
-    plt.xlabel("r")
-    plt.ylabel("Radial Probability Density")
-plt.tight_layout()
-plt.savefig("radial_probability_n1-4_l0.png")
-plt.close()
+    #plt.subplots(2,2)
+   # plt.subplot(2,2,n.index(i)+1)
+  #  plt.plot(r,P**2)
+   # plt.vlines(r_expectation_value, ymin=0, ymax=max(P**2), colors='r', linestyles='dashed', label='<r>')
+    #plt.title(f"Radial Probability Density for n={i}, l={l}\n<r>={r_expectation_value:.2f}")
+    #plt.xlabel("r")
+    #plt.ylabel("Radial Probability Density")
+#plt.tight_layout()
+#plt.savefig("radial_probability_n1-4_l0.png")
+#plt.close()
 
 
