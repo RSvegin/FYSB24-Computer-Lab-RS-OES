@@ -11,7 +11,12 @@ import matplotlib.pyplot as plt
 import sys
 import datetime
 
-def radiallog(l,n,Z,plot=True):
+def radiallog(l, n, Z, zeta=None, a=0.2683, N=None, plot=True): #adds arguments for a and zeta
+    # If N is given, compute zeta from N (per lab definition)
+    if zeta is None and N is not None:
+        zeta = Z - N + 1
+    if zeta is None:    
+        raise ValueError("Provide either zeta or N to define the ionic charge.")
 
     starttime=datetime.datetime.now().timestamp()
     
@@ -39,9 +44,17 @@ def radiallog(l,n,Z,plot=True):
             rho = rhomin + np.linspace(0,grid_points-1,grid_points)*h;  # generate grid
             r = np.exp(rho)/Z;
             # Define the effective potential 
-            U = np.linspace(0, 0, grid_points)            #initialize U
-            U[0] = 0                                      #gets a  0  value at r = 0
-            U[1:] = -Z/r[1:] + l*(l+1)/(2*r[1:]**2)
+           
+            # Parametric potential Va(r)
+            Va = np.zeros(grid_points) #makes a grid for potential
+            Va[0] = 0.0                # harmless placeholder at r=0 (we never use it directly there)
+            Va[1:] = -Z/r[1:] + (Z - zeta) * (r[1:]) / (a*a + r[1:]**2)
+            #formula
+            # Effective potential U(r) = Va(r) + l(l+1)/(2r^2)
+            U = np.zeros(grid_points) #repeat for U
+            U[0] = 0.0
+            U[1:] = Va[1:] + l*(l+1)/(2.0 * r[1:]**2)
+
     
             #Determine the outer classical turning point. Start from the practical infinity
             # and step inwards until U(i) < E
@@ -56,7 +69,7 @@ def radiallog(l,n,Z,plot=True):
             else:
                 break
     
-        g = -2*r**2*(E + Z/r) + (l+1/2)**2;               #g function for Numerow
+        g = g = -2.0 * r**2 * (E - Va) + (l + 0.5)**2;        #updated numerov
         alpha = 1-(h**2/12)*g                             #alpha and
         beta = 2+(5*h**2/6)*g                             #beta for Numerov's method
     
