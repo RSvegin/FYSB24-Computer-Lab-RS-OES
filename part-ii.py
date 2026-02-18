@@ -4,7 +4,7 @@ import numpy as np
 import radial as rad
 import radiallog as radlog
 import pandas as pd
-
+import scipy.optimize as opt
 #numbers for Na I
 Z = 11
 N = 11
@@ -37,3 +37,104 @@ data={"orbital":lab,
     "Computed Energies":energies,}
 df=pd.DataFrame(data)
 print(df)
+
+#---------task sieben----------
+
+
+nist_li_centroids_au = {
+    '2p':  0.067907105,
+    '3s':  0.123960204,
+    '3p':  0.140906400,
+    '3d':  0.142536310,
+    '4s':  0.159526684,
+    '4p':  0.166167497,
+    '4d':  0.166868453,
+    '4f':  0.166899473,
+}
+
+Z = 3
+N = 3
+zeta = Z - N + 1
+
+l_map = {'s':0, 'p':1, 'd':2, 'f':3}
+
+
+def get_energy(n, l, a):
+    # radiallog returns (r, P, E, grid_points)
+    out = radlog.radiallog(l=l, n=n, Z=Z, zeta=zeta, a=a, plot=False)
+
+    E = out[2]     # <-- ENERGY IS INDEX 2
+
+    return float(E)
+
+
+def residuals(a_array):
+
+    a = float(a_array[0])
+
+    # ground state (2s)
+    E2s = get_energy(2, 0, a)
+
+    res = []
+
+    for key in nist_li_centroids_au:
+
+        Enist = float(nist_li_centroids_au[key])
+
+        n = int(key[0])
+        l = l_map[key[1]]
+
+        Ecalc = get_energy(n, l, a)
+
+        deltaE = Ecalc - E2s
+
+        res.append(deltaE - Enist)
+
+    return np.array(res)
+
+
+a0 = np.array([0.3])
+
+a_opt, _ = opt.leastsq(residuals, a0)
+
+a_best = float(a_opt[0])
+
+print("\nOptimized a =", a_best)
+
+print("\nEffect of changing a (example: 3p level):") #shows how E varys with a 
+
+for a_test in [0.15, 0.25, 0.35, 0.45]:
+
+    E2s = get_energy(2, 0, a_test)
+    E3p = get_energy(3, 1, a_test)
+
+    delta = E3p - E2s
+
+    print(f"a = {a_test:.2f}   ΔE(3p) = {delta:.6f}")
+
+# ------------------
+# Comparison table
+# ------------------
+
+E2s = get_energy(2, 0, a_best)
+
+print("\nState   Computed (a.u.)   NIST (a.u.)")
+
+for key in nist_li_centroids_au:
+
+    Enist = nist_li_centroids_au[key]
+
+    n = int(key[0])
+    l = l_map[key[1]]
+
+    Ecalc = get_energy(n, l, a_best)
+    deltaE = Ecalc - E2s
+
+    print(f"{key:4s}   {deltaE:12.6f}   {Enist:10.6f}")
+
+
+
+#calc energies for all levels with radlog
+#subtract against nist values
+#minmise this difference by varying a
+#plot difference v a
