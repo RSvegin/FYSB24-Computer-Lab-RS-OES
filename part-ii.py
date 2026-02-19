@@ -38,6 +38,27 @@ data={"orbital":lab,
 df=pd.DataFrame(data)
 print(df)
 
+
+#plotting radial functions for 1s, 2s, 3p, 3d,
+r = np.linspace(0,20,1000) 
+Z = 3
+
+P1s=Rf.P1s(r,Z)
+P2s=Rf.P2s(r,Z)
+P3p=Rf.P3p(r,Z)
+P3d=Rf.P3d(r,Z)
+
+
+plt.plot(r,P2s)
+plt.plot(r,P3p)
+plt.plot(r,P3d)
+plt.plot(r,P1s)
+plt.xlabel("r (a.u.)")
+plt.ylabel("P(r)")
+plt.title("Radial Density Functions for 1s, 2s, 3p, 3d. Z=3")
+plt.legend(["P1s","P2s","P3p","P3d"])
+plt.show()
+plt.savefig('part2_radial_functions.png')
 #---------task sieben----------
 
 
